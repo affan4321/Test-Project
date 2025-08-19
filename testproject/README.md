@@ -1,36 +1,139 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Social Media App with Real-Time Chat
 
-## Getting Started
+A full-stack social media application built with Next.js, React, Express, PostgreSQL, and Socket.io. This project supports user authentication, posts, likes, comments, and real-time one-to-one chat between users.
 
-First, run the development server:
+# Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- User authentication (register/login) with JWT
+- Profile with optional profile picture and bio
+- Create, like, and comment on posts
+- Real-time private messaging
+- Online users tracking
+- Chatbox UI on bottom-right corner
+- Persisted messages in PostgreSQL
+
+# Tech Stack
+
+- Frontend: Next.js, React, Tailwind CSS
+- Backend: Express.js, Socket.io
+- Database: PostgreSQL
+- Authentication: JWT
+- File Uploads: Multer
+
+# database schema
+```
+-- Users table
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  name VARCHAR(100),
+  bio TEXT,
+  interests TEXT[],
+  profile_picture VARCHAR(255)
+);
+
+-- Posts table
+CREATE TABLE posts (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id),
+  content TEXT,
+  image_url VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Likes table
+CREATE TABLE likes (
+  id SERIAL PRIMARY KEY,
+  post_id INT REFERENCES posts(id),
+  user_id INT REFERENCES users(id)
+);
+
+-- Comments table
+CREATE TABLE comments (
+  id SERIAL PRIMARY KEY,
+  post_id INT REFERENCES posts(id),
+  user_id INT REFERENCES users(id),
+  content TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Messages table
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INT REFERENCES users(id),
+  receiver_id INT REFERENCES users(id),
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Api endpoints
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Auth
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+POST /api/register – Register a new user (with profile picture upload)
 
-## Learn More
+POST /api/login – Login and receive JWT
 
-To learn more about Next.js, take a look at the following resources:
+GET /api/me – Get current user info (requires JWT)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Posts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+GET /api/posts – Fetch all posts
 
-## Deploy on Vercel
+POST /api/posts – Create a new post
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+DELETE /api/posts/:id – Delete a post
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Messages
+
+GET /api/messages/:userId – Fetch all messages between logged-in user and selected user
+
+# Socket.io Events
+
+- Client → Server
+
+- private_message – Send a private message
+
+```socket.emit("private_message", { toUserId, message });```
+
+
+- like_post – Like a post
+
+- comment_post – Add a comment
+
+
+
+- private_message – Receive a private message
+
+- like_update – Real-time post like update
+
+- comment_update – Real-time comment update
+
+# Setup:
+
+- clone repo
+``git clone <your-repo-url>
+cd <repo-folder>
+``
+
+- Install backend dependencies:
+``npm install``
+
+- Create a .env file with the following:
+``PORT=5000
+DATABASE_URL=postgresql://username:password@localhost:5432/yourdb
+JWT_SECRET=your_jwt_secret
+``
+
+- Start server:
+``nodemon routes/server.js
+``
+
+- Start frontend:
+``cd frontend
+npm install
+npm run dev
+``

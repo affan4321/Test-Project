@@ -11,7 +11,7 @@ const router = express.Router();
 // Multer config (store in uploads/ folder)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // make sure this folder exists
+    cb(null, "public/uploads/"); // make sure this folder exists
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname)); // unique filename
@@ -34,7 +34,7 @@ router.post("/register", upload.single("profile_picture"), async (req, res) => {
       }
     }
 
-    const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
+    const profilePicture = req.file ? `/public/uploads/${req.file.filename}` : null;
 
     if (!username || !email || !password) {
       return res.status(400).json({ error: "Missing required fields" });

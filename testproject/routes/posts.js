@@ -32,8 +32,12 @@ router.post("/posts", authenticateToken, upload.single("image"), async (req, res
   try {
     const { content } = req.body;
     
+    // const imageUrl = req.file 
+    // ? `${req.protocol}://${req.get("host")}/public/uploads/${req.file.filename}`
+    // : null;
+
     const imageUrl = req.file 
-    ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+    ? `/uploads/${req.file.filename}`
     : null;
 
 
